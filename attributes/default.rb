@@ -49,3 +49,6 @@ default['ephemeral_lvm']['wipe_signatures'] = false
 
 # Array of devices to force into the ephemeral device list
 default['ephemeral_lvm']['additonal_devices'] = []
+
+# Use `lsblk` to find disks. Useful for newer AWS instances where block device information is wrong.
+default['ephemeral_lvm']['use_lsblk']

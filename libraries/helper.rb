@@ -90,7 +90,17 @@ module EphemeralLvm
       # If the cloud plugin supports block device mapping on the node, obtain the
       # information from the node for setting up block device
       #
-      if node[cloud].keys.any? { |key| key.match(/^block_device_mapping_ephemeral\d+$/) }
+      if node['ephemeral_lvm']['use_lsblk']
+        devices = JSON.parse(`lsblk -J`)
+        ephemeral_devices = devices['blockdevices'].map do |device|
+          if device['type'] == 'disk' && (device['children'].nil? || device['children'][0]['type'] == 'lvm')
+            name = device['name']
+            name =~ %r{\/dev\/} ? name : "/dev/#{name}"
+          end
+        end
+
+        ephemeral_devices.compact!
+      elsif node[cloud].keys.any? { |key| key.match(/^block_device_mapping_ephemeral\d+$/) }
         ephemeral_devices = node[cloud].map do |key, device|
           if key =~ /^block_device_mapping_ephemeral\d+$/
             device =~ %r{\/dev\/} ? device : "/dev/#{device}"
